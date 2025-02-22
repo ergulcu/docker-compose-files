@@ -1,0 +1,15 @@
+services:
+  db:
+    container_name: postgres_container
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespass
+      PGDATA: /data/postgres
+      POSTGRES_DB: poscore
+    volumes:
+      - dbvol:/data/postgres
+    ports:
+      - "5432:5432"
+volumes:
+  dbvol:
