@@ -4,9 +4,9 @@ services:
     image: postgres:17
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespass
+      POSTGRES_PASSWORD: password
       PGDATA: /data/postgres
-      POSTGRES_DB: poscore
+      POSTGRES_DB: postgr
     volumes:
       - dbvol:/data/postgres
     ports:
