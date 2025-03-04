@@ -5,7 +5,7 @@ This guide provides a set of ready-to-run Docker Compose commands for managing y
 ## Basic Commands
 
 ### Start the Services
-To start the services defined in your `docker-compose.yml` file, run:
+To start the services defined go to directory of service folder and run with following command:
 
 ```bash
 docker-compose up
