@@ -1,0 +1,11 @@
+services:
+  zipkin:
+    image: openzipkin/zipkin:3
+    ports:
+      - "9411:9411"
+    volumes:
+      - zipkin-storage:/zipkin
+    restart: always
+
+volumes:
+  zipkin-storage:
