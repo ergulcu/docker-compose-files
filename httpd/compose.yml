@@ -1,0 +1,10 @@
+services:
+  apache:
+    image: httpd:latest
+    container_name: my-apache-app
+    ports:
+    - '80:80'
+    volumes:
+    - myapp:/usr/local/apache2/htdocs
+volumes:
+  myapp:
