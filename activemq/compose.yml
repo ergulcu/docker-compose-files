@@ -1,0 +1,21 @@
+services:
+  activemq:
+    image: apache/activemq-classic:6.1.5
+    container_name: activemq
+    restart: always
+    ports:
+      - "61616:61616"  # OpenWire
+      - "8161:8161"    # Web Console
+      - "5672:5672"    # AMQP
+      - "61613:61613"  # STOMP
+      - "1883:1883"    # MQTT
+    environment:
+      ACTIVEMQ_ADMIN_LOGIN: "admin"
+      ACTIVEMQ_ADMIN_PASSWORD: "admin"
+      #ACTIVEMQ_CONFIG_MIN_MEMORY: "512"
+      #ACTIVEMQ_CONFIG_MAX_MEMORY: "2048"
+    volumes:
+      - activemq-data:/opt/activemq/data
+
+volumes:
+  activemq-data:
