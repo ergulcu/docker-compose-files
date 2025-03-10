@@ -8,39 +8,39 @@ This guide provides a set of ready-to-run Docker Compose commands for managing y
 To start the services defined go to directory of service folder and run with following command:
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
 ### Stop and Then Start the Services
 To stop the containers and restart them with recreated images:
 
 ```bash
-docker-compose down
-docker-compose up
+docker compose down
+docker compose up
 ```
 
 ### Stop and Then Start with Recreated Images
 If you want to stop the services, recreate the images, and then start the services, run:
 
 ```bash
-docker-compose down
-docker-compose up --force-recreate
+docker compose down
+docker compose up --force-recreate
 ```
 
 ### Stop with Removing Volumes and Then Start
 To stop the services, remove associated volumes, and then start the services, use:
 
 ```bash
-docker-compose down -v
-docker-compose up
+docker compose down -v
+docker compose up
 ```
 
 ### Stop with Removing Volumes and Then Start with Recreated Images
 To stop the services, remove associated volumes, recreate the images, and then start the services, run:
 
 ```bash
-docker-compose down -v
-docker-compose up --force-recreate
+docker compose down -v
+docker compose up --force-recreate
 ```
 
 ### Additional Notes
