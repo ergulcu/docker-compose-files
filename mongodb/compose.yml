@@ -4,7 +4,7 @@
 # MongoDB with mongo-express (http://localhost:8081, this machine only: the UI has no login).
 services:
   mongo:
-    image: mongodb/mongodb-community-server:8.0-ubi9-slim
+    image: mongodb/mongodb-community-server:8.2-ubi9-slim
     restart: unless-stopped
     ports:
       - "27017:27017"
@@ -15,7 +15,7 @@ services:
       - mongo-data:/data/db
 
   mongo-express:
-    image: mongo-express:1.0.2-20-alpine3.19
+    image: mongo-express:1-18-alpine3.19
     restart: unless-stopped
     ports:
       - "127.0.0.1:8081:8081"

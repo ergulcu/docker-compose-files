@@ -8,7 +8,7 @@
 # PostgreSQL is on port 5433 of the host, so it can run next to postgres/.
 # Liquibase stays on 4.33, the last line under the Apache License; 5.x changed the license of the community edition.
 x-liquibase: &liquibase
-  image: liquibase/liquibase:4.33
+  image: liquibase/liquibase:5.0
   environment: &liquibase-env
     LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-db}
     LIQUIBASE_COMMAND_USERNAME: ${POSTGRES_USER:?copy .env.example to .env}
