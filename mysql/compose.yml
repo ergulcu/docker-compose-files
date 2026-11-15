@@ -1,16 +1,19 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
 services:
   mysqldb:
     image: mysql:8.4
+    restart: unless-stopped
     environment:
-      MYSQL_DATABASE: 'db'
-      MYSQL_USER: 'user'
-      MYSQL_PASSWORD: 'password'
-      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_DATABASE: db
+      MYSQL_USER: ${MYSQL_USER:?copy .env.example to .env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?copy .env.example to .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?copy .env.example to .env}
     ports:
-      - '3306:3306'
-    #expose:
-      #- '3306'
+      - "3306:3306"
     volumes:
       - mysqldbvol:/var/lib/mysql
+
 volumes:
   mysqldbvol:

@@ -1,8 +1,13 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# WireMock: http://localhost:8091 (try http://localhost:8091/hello). Stubs live in mappings/, bodies in __files/.
 services:
   wiremock:
-    image: "wiremock/wiremock:latest"
+    image: wiremock/wiremock:3.13.2-alpine
+    restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8091:8080"
     volumes:
       - ./__files:/home/wiremock/__files
       - ./mappings:/home/wiremock/mappings

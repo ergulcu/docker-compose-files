@@ -1,51 +1,66 @@
-volumes:
-  broker1:
-  broker2:
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# Two Kafka nodes in KRaft mode (no ZooKeeper), each one broker and controller, with Kafbat UI.
+# The bitnami/kafka image used before is no longer published for free; this uses the official apache/kafka image.
+#   from the host: localhost:9092,localhost:9094   from containers: broker1:9093,broker2:9093
+#   UI: http://localhost:8085
+# Two controllers cannot lose one of them; use three nodes for a quorum that survives a failure.
+x-kafka: &kafka
+  image: apache/kafka:4.4.0
+  restart: unless-stopped
+  environment: &kafka-env
+    CLUSTER_ID: r4zt_wrqTRuT7W2NJsB_GA
+    KAFKA_PROCESS_ROLES: broker,controller
+    KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker1:9091,2@broker2:9091
+    KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
+    KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+    KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+    KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+    KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    KAFKA_DEFAULT_REPLICATION_FACTOR: 2
+
 services:
   broker1:
+    <<: *kafka
+    container_name: broker1
     ports:
       - "9092:9092"
-    image: 'bitnami/kafka:3.9'
-    container_name: broker1
     environment:
-      KAFKA_ENABLE_KRAFT: yes
-      KAFKA_CFG_PROCESS_ROLES: 'broker,controller'
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://broker1:9092
-      KAFKA_CFG_BROKER_ID: 1
-      KAFKA_CFG_NODE_ID: 1
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: '1@broker1:9093,2@broker2:9093'
-      ALLOW_PLAINTEXT_LISTENER: yes
-      KAFKA_KRAFT_CLUSTER_ID: r4zt_wrqTRuT7W2NJsB_GA
+      <<: *kafka-env
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: CONTROLLER://0.0.0.0:9091,DOCKER://0.0.0.0:9093,HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: DOCKER://broker1:9093,HOST://localhost:9092
     volumes:
-      - broker1:/bitnami/kafka
+      - broker1:/var/lib/kafka/data
+
   broker2:
-    image: 'bitnami/kafka:3.9'
+    <<: *kafka
     container_name: broker2
+    ports:
+      - "9094:9094"
     environment:
-      KAFKA_ENABLE_KRAFT: yes
-      KAFKA_CFG_PROCESS_ROLES: 'broker,controller'
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://broker2:9092
-      KAFKA_CFG_BROKER_ID: 2
-      KAFKA_CFG_NODE_ID: 2
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: '1@broker1:9093,2@broker2:9093'
-      ALLOW_PLAINTEXT_LISTENER: yes
-      KAFKA_KRAFT_CLUSTER_ID: r4zt_wrqTRuT7W2NJsB_GA
+      <<: *kafka-env
+      KAFKA_NODE_ID: 2
+      KAFKA_LISTENERS: CONTROLLER://0.0.0.0:9091,DOCKER://0.0.0.0:9093,HOST://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: DOCKER://broker2:9093,HOST://localhost:9094
     volumes:
-      - broker2:/bitnami/kafka
+      - broker2:/var/lib/kafka/data
+
   kafka-ui:
     container_name: kafka-ui
-    image: 'provectuslabs/kafka-ui:0.7.2'
+    image: ghcr.io/kafbat/kafka-ui:v1.5.0
+    restart: unless-stopped
     depends_on:
       - broker1
       - broker2
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8085:8080"
     environment:
-      KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: 'broker1:9092,broker2:9092'
       KAFKA_CLUSTERS_0_NAME: local-kafka-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker1:9093,broker2:9093
+
+volumes:
+  broker1:
+  broker2:

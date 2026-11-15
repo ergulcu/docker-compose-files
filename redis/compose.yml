@@ -1,9 +1,14 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
 services:
   redis:
-    image: redis:latest
+    image: redis:8.8-alpine
+    restart: unless-stopped
     ports:
       - "6379:6379"
-    volumes: 
+    volumes:
       - rediscache:/data
+
 volumes:
   rediscache:

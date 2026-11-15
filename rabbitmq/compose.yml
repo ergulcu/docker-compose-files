@@ -1,28 +1,21 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# RabbitMQ with the management UI: http://localhost:15672 (user and password from .env).
+# The bitnami/rabbitmq cluster used before is no longer published for free; this is the official image.
 services:
-  stats:
-    image: bitnami/rabbitmq
+  rabbitmq:
+    image: rabbitmq:4.4-management-alpine
+    hostname: rabbitmq
+    restart: unless-stopped
     environment:
-      - RABBITMQ_NODE_TYPE=stats
-      - RABBITMQ_NODE_NAME=rabbit@stats
-      - RABBITMQ_ERL_COOKIE=s3cr3tc00ki3
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?copy .env.example to .env}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?copy .env.example to .env}
     ports:
-      - '15672:15672'
+      - "5672:5672"   # AMQP
+      - "15672:15672" # management UI
     volumes:
-      - 'rabbitmqstats_data:/bitnami/rabbitmq/mnesia'
-  queue-disc1:
-    image: bitnami/rabbitmq
-    environment:
-      - RABBITMQ_NODE_TYPE=queue-disc
-      - RABBITMQ_NODE_NAME=rabbit@queue-disc1
-      - RABBITMQ_CLUSTER_NODE_NAME=rabbit@stats
-      - RABBITMQ_ERL_COOKIE=s3cr3tc00ki3
-    volumes:
-      - 'rabbitmqdisc1_data:/bitnami/rabbitmq/mnesia'
+      - rabbitmq_data:/var/lib/rabbitmq
 
 volumes:
-  rabbitmqstats_data:
-    driver: local
-  rabbitmqdisc1_data:
-    driver: local
-  rabbitmqram1_data:
-    driver: local
+  rabbitmq_data:

@@ -1,6 +1,19 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# An alternative to activemq/: same ports, run one of them at a time.
 services:
   artemis:
-    image: apache/activemq-artemis:2.39.0-alpine
+    image: apache/activemq-artemis:2.44.0-alpine
+    restart: unless-stopped
     ports:
-       - "61616:61616"
-       - "8161:8161"
+      - "61616:61616" # core, OpenWire, AMQP, STOMP, MQTT
+      - "8161:8161"   # web console, http://localhost:8161
+    environment:
+      ARTEMIS_USER: ${ARTEMIS_USER:?copy .env.example to .env}
+      ARTEMIS_PASSWORD: ${ARTEMIS_PASSWORD:?copy .env.example to .env}
+    volumes:
+      - artemis-data:/var/lib/artemis-instance
+
+volumes:
+  artemis-data:

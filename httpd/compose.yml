@@ -1,10 +1,15 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
 services:
   apache:
-    image: httpd:latest
+    image: httpd:2.4.71-alpine
     container_name: my-apache-app
+    restart: unless-stopped
     ports:
-    - '80:80'
+      - "8088:80" # http://localhost:8088
     volumes:
-    - myapp:/usr/local/apache2/htdocs
+      - myapp:/usr/local/apache2/htdocs
+
 volumes:
   myapp:

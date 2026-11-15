@@ -1,17 +1,20 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
 services:
   activemq:
-    image: apache/activemq-classic:6.1.5
+    image: apache/activemq-classic:6.2.0
     container_name: activemq
-    restart: always
+    restart: unless-stopped
     ports:
-      - "61616:61616"  # OpenWire
-      - "8161:8161"    # Web Console
-      - "5672:5672"    # AMQP
-      - "61613:61613"  # STOMP
-      - "1883:1883"    # MQTT
+      - "61616:61616" # OpenWire
+      - "8161:8161"   # web console, http://localhost:8161
+      - "5673:5672"   # AMQP (5673 on the host, RabbitMQ keeps 5672)
+      - "61613:61613" # STOMP
+      - "1883:1883"   # MQTT
     environment:
-      ACTIVEMQ_ADMIN_LOGIN: "admin"
-      ACTIVEMQ_ADMIN_PASSWORD: "admin"
+      ACTIVEMQ_ADMIN_LOGIN: ${ACTIVEMQ_ADMIN_LOGIN:?copy .env.example to .env}
+      ACTIVEMQ_ADMIN_PASSWORD: ${ACTIVEMQ_ADMIN_PASSWORD:?copy .env.example to .env}
       #ACTIVEMQ_CONFIG_MIN_MEMORY: "512"
       #ACTIVEMQ_CONFIG_MAX_MEMORY: "2048"
     volumes:

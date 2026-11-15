@@ -1,22 +1,29 @@
-services:
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
 
+# MongoDB with mongo-express (http://localhost:8081, this machine only: the UI has no login).
+services:
   mongo:
-    image: mongodb/mongodb-community-server:7.0.12-ubuntu2204-20240919T101748Z
-    restart: always
+    image: mongodb/mongodb-community-server:8.0-ubi9-slim
+    restart: unless-stopped
     ports:
-      - 27017:27017
+      - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-      MONGO_INITDB_DATABASE: local
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:?copy .env.example to .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?copy .env.example to .env}
+    volumes:
+      - mongo-data:/data/db
 
   mongo-express:
-    image: mongo-express
-    restart: always
+    image: mongo-express:1.0.2-20-alpine3.19
+    restart: unless-stopped
     ports:
-      - 8081:8081
+      - "127.0.0.1:8081:8081"
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: example
-      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/
-      ME_CONFIG_BASICAUTH: false
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/
+      ME_CONFIG_BASICAUTH: "false"
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:

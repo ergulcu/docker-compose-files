@@ -1,0 +1,38 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# One weekly pull request per ecosystem; security updates are opened right away.
+version: 2
+updates:
+  - package-ecosystem: docker-compose
+    directories:
+      - "/activemq"
+      - "/artemis"
+      - "/httpd"
+      - "/httpwithsftp"
+      - "/kafkanativewithui"
+      - "/kafkawithoutzookeper"
+      - "/keycloak"
+      - "/liquibase"
+      - "/mongodb"
+      - "/mysql"
+      - "/portainer"
+      - "/postgres"
+      - "/rabbitmq"
+      - "/redis"
+      - "/sftp"
+      - "/sonarqube"
+      - "/wiremock"
+      - "/zipkin"
+    schedule:
+      interval: weekly
+    groups:
+      docker_compose:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github_actions:
+        patterns: ["*"]

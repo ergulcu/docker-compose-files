@@ -1,14 +1,18 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# Portainer: https://localhost:9443 (self-signed certificate; port 9000 is left to SonarQube).
 services:
   portainer:
-    image: portainer/portainer-ce:alpine
+    image: portainer/portainer-ce:2.45.3-alpine
     container_name: portainer
     command: -H unix:///var/run/docker.sock
+    restart: unless-stopped
     ports:
-      - "9000:9000"
+      - "9443:9443"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "portainer_data:/data"
-    restart: always
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
 
 volumes:
   portainer_data:

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2025 Mehmet ERGULCU
+  SPDX-License-Identifier: Apache-2.0
+
+  Runs every changelog file in scripts/ in alphabetical order. Change sets that already ran are
+  recorded in the databasechangelog table and skipped next time.
+-->
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <includeAll path="scripts/" relativeToChangelogFile="true"/>
+</databaseChangeLog>

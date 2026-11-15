@@ -1,30 +1,62 @@
-version: "3.1"
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# Liquibase against PostgreSQL (the former poc-liquibase-docker repository).
+#   docker compose up                        database + "update": runs every changelog in changelog/scripts
+#   docker compose run --rm generate         writes the current schema to generate/changelog-generate.xml
+#   docker compose run --rm liquibase status shows the change sets that have not run yet
+# PostgreSQL is on port 5433 of the host, so it can run next to postgres/.
+# Liquibase stays on 4.33, the last line under the Apache License; 5.x changed the license of the community edition.
+x-liquibase: &liquibase
+  image: liquibase/liquibase:4.33
+  environment: &liquibase-env
+    LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-db}
+    LIQUIBASE_COMMAND_USERNAME: ${POSTGRES_USER:?copy .env.example to .env}
+    LIQUIBASE_COMMAND_PASSWORD: ${POSTGRES_PASSWORD:?copy .env.example to .env}
+    LIQUIBASE_COMMAND_DEFAULT_SCHEMA_NAME: public
+    LIQUIBASE_SEARCH_PATH: /liquibase/changelog
+  depends_on:
+    postgres:
+      condition: service_healthy
 
 services:
   liquibase:
-    container_name: liquibase
-    image: liquibase/liquibase:4.31
+    <<: *liquibase
     command: update
-    environment: 
-      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres:5432/db
-      LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.xml
-      LIQUIBASE_COMMAND_USERNAME: postgres
-      LIQUIBASE_COMMAND_PASSWORD: password
-      LIQUIBASE_SEARCH_PATH: /liquibase/changelog
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - .:/liquibase/changelog
-  postgres:
-    image: postgres:17
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      <<: *liquibase-env
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.xml
+    volumes:
+      - ./changelog:/liquibase/changelog:ro
+
+  generate:
+    <<: *liquibase
+    profiles: [tools]
+    command: generate-changelog
+    environment:
+      <<: *liquibase-env
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: /liquibase/generate/changelog-generate.xml
+      LIQUIBASE_COMMAND_OVERWRITE_OUTPUT_FILE: "true"
+    volumes:
+      - ./changelog:/liquibase/changelog:ro
+      - ./generate:/liquibase/generate
+
+  postgres:
+    image: postgres:${POSTGRES_VERSION:-18}-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-db}
       PGDATA: /data/postgres
-      POSTGRES_DB: db
+    ports:
+      - "5433:5432"
+    volumes:
+      - liquibase-postgres:/data/postgres
     healthcheck:
-      test: pg_isready -U postgres -d postgres
-      interval: 1s
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
       timeout: 3s
       retries: 30
+
+volumes:
+  liquibase-postgres:

@@ -1,5 +1,0 @@
-services:
-  castlemock:
-    image: castlemock/castlemock:v1.67
-    ports:
-      - "8080:8080"

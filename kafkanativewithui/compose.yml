@@ -1,29 +1,32 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# Single Kafka node (KRaft, GraalVM native image) with Kafbat UI.
+#   from the host: localhost:9092   from other containers: kafka:9093   UI: http://localhost:8085
 services:
   kafka:
-    image: apache/kafka-native:3.9.0
+    image: apache/kafka-native:4.4.0
+    restart: unless-stopped
     ports:
       - "9092:9092"
     environment:
-      # Configure listeners for both docker and host communication
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
       KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
-
-      # Settings required for KRaft mode
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
-
-      # Listener to use for broker-to-broker communication
       KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
-
-      # Required for a single node cluster
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
   kafka-ui:
-    image: ghcr.io/kafbat/kafka-ui:v1.0.0
+    image: ghcr.io/kafbat/kafka-ui:v1.5.0
+    restart: unless-stopped
     ports:
-      - 8080:8080
+      - "127.0.0.1:8085:8080" # the UI has no login, so it listens on this machine only
     environment:
       DYNAMIC_CONFIG_ENABLED: "true"
       KAFKA_CLUSTERS_0_NAME: local

@@ -1,0 +1,61 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# Every compose file must be valid and no two folders may share a host port. Once a week, and when
+# started by hand, every image tag is also checked against its registry.
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Compose files and ports
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - run: sh scripts/check.sh
+      - name: License headers
+        run: |
+          missing=$(git ls-files '*.yml' '*.yaml' '*.xml' '*.sql' '*.sh' '*.bat' | grep -v -E '^\.mvn/' | xargs -r grep -L 'SPDX-License-Identifier' || true)
+          if [ -n "$missing" ]; then
+            echo "These files have no license header:"
+            echo "$missing"
+            exit 1
+          fi
+
+  images:
+    name: Image tags exist
+    if: github.event_name != 'push' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - run: sh scripts/check.sh --images
+
+  liquibase:
+    name: Liquibase update runs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - working-directory: liquibase
+        run: |
+          cp .env.example .env
+          docker compose up -d --wait postgres
+          docker compose run --rm liquibase
+          docker compose exec -T postgres psql -U postgres -d db -c 'SELECT * FROM newtable1, newtable2'
+          docker compose down -v

@@ -1,12 +1,17 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# SonarQube Community Build: http://localhost:9000 (first login admin/admin, then change it).
 services:
   sonarqube:
-    image: sonarqube:lts-community
+    image: sonarqube:26.11.0.134175-community
+    restart: unless-stopped
     depends_on:
       - sonardb
     environment:
       SONAR_JDBC_URL: jdbc:postgresql://sonardb:5432/sonar
-      SONAR_JDBC_USERNAME: sonar
-      SONAR_JDBC_PASSWORD: sonar
+      SONAR_JDBC_USERNAME: ${SONAR_DB_USER:?copy .env.example to .env}
+      SONAR_JDBC_PASSWORD: ${SONAR_DB_PASSWORD:?copy .env.example to .env}
     volumes:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
@@ -15,12 +20,14 @@ services:
       - "9000:9000"
     networks:
       - sonarnetwork
+
   sonardb:
-    #container_name: sonar_postgres_container
-    image: postgres:17
+    # Stays on PostgreSQL 17, so an existing database volume keeps working.
+    image: postgres:17-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: sonar
-      POSTGRES_PASSWORD: sonar
+      POSTGRES_USER: ${SONAR_DB_USER}
+      POSTGRES_PASSWORD: ${SONAR_DB_PASSWORD}
       PGDATA: /data/postgres
     volumes:
       - postgresql_data:/data/postgres
@@ -32,5 +39,6 @@ volumes:
   sonarqube_extensions:
   sonarqube_logs:
   postgresql_data:
+
 networks:
   sonarnetwork:

@@ -1,29 +1,32 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# Files uploaded over SFTP (port 2223, user from .env, folder /app) are served by Apache on port 8089.
 services:
   openssh-server:
-    image: lscr.io/linuxserver/openssh-server:latest
-    hostname: openssh-server # optional
+    image: lscr.io/linuxserver/openssh-server:version-10.3_p1-r2
+    hostname: openssh-server
+    restart: unless-stopped
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - SUDO_ACCESS=true # optional
-      - PASSWORD_ACCESS=true # optional
-      - USER_PASSWORD=password # optional
-      - USER_NAME=linuxserver # optional
-      - LOG_STDOUT= # optional
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Etc/UTC
+      SUDO_ACCESS: "false"
+      PASSWORD_ACCESS: "true"
+      USER_NAME: ${SFTP_USER:?copy .env.example to .env}
+      USER_PASSWORD: ${SFTP_PASSWORD:?copy .env.example to .env}
     volumes:
       - sftphttpdsharedvol:/app
     ports:
-      - "22:2222"
-    restart: unless-stopped
+      - "2223:2222" # the host keeps port 22 for its own SSH server
 
   apache:
-    image: httpd:latest
+    image: httpd:2.4.71-alpine
+    restart: unless-stopped
     ports:
-      - "80:80"
+      - "8089:80"
     volumes:
       - sftphttpdsharedvol:/usr/local/apache2/htdocs
-    restart: unless-stopped
 
 volumes:
   sftphttpdsharedvol:

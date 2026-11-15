@@ -1,22 +1,25 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# SFTP server on port 2222 (user and password from .env).
 services:
   openssh-server:
-    image: lscr.io/linuxserver/openssh-server:version-9.9_p2-r0
+    image: lscr.io/linuxserver/openssh-server:version-10.3_p1-r2
     container_name: openssh-server
-    hostname: openssh-server #optional
+    hostname: openssh-server
+    restart: unless-stopped
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - SUDO_ACCESS=false #optional
-      - PASSWORD_ACCESS=true #optional
-      - USER_PASSWORD=password #optional
-      - USER_PASSWORD_FILE=/path/to/file #optional
-      - USER_NAME=linuxserver #optional
-      - LOG_STDOUT= #optional
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Etc/UTC
+      SUDO_ACCESS: "false"
+      PASSWORD_ACCESS: "true"
+      USER_NAME: ${SFTP_USER:?copy .env.example to .env}
+      USER_PASSWORD: ${SFTP_PASSWORD:?copy .env.example to .env}
     volumes:
       - myapp:/config
     ports:
-      - 2222:2222
-    restart: unless-stopped
+      - "2222:2222"
+
 volumes:
   myapp:

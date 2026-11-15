@@ -1,42 +1,38 @@
 @echo off
+REM Copyright 2025 Mehmet ERGULCU
+REM SPDX-License-Identifier: Apache-2.0
+REM
+REM Lists the folders, starts the chosen one with "docker compose up" and stops it with Ctrl+C.
+REM A missing .env is copied from .env.example first.
 setlocal enabledelayedexpansion
+cd /d "%~dp0"
 
-REM Initialize variables
-set "index=1"
-set "selection="
-set "folders="
-
-REM List all subfolders
+set "index=0"
 for /d %%D in (*) do (
-    echo !index!: %%D
-    set "folders=!folders!%%D|"
-    set /a index+=1
+    if exist "%%D\compose.yml" (
+        set /a index+=1
+        set "folder!index!=%%D"
+        echo !index!: %%D
+    )
 )
 
-REM Prompt user for selection
-set /p selection=Please enter the number corresponding to the desired folder: 
+set "selection="
+set /p selection=Number of the folder to start:
+if not defined selection goto invalid
+set "selectedFolder=!folder%selection%!"
+if not defined selectedFolder goto invalid
 
-REM Validate selection
-set "selectedFolder="
-for /f "tokens=%selection% delims=|" %%F in ("!folders!") do set "selectedFolder=%%F"
-
-if not defined selectedFolder (
-    echo Invalid selection. Exiting.
-    exit /b 1
-)
-
-REM Change to the selected directory
 cd "%selectedFolder%"
-
-REM Check if compose.yml exists
-if not exist compose.yml (
-    echo compose.yml not found in %selectedFolder%. Exiting.
-    exit /b 1
+if exist .env.example if not exist .env (
+    copy .env.example .env >nul
+    echo Created %selectedFolder%\.env from .env.example; change the passwords there if needed.
 )
-
-REM Run docker-compose
 docker compose up
-
-REM Return to the original directory
 cd ..
 endlocal
+exit /b 0
+
+:invalid
+echo Invalid selection.
+endlocal
+exit /b 1

@@ -1,11 +1,10 @@
+# Copyright 2025 Mehmet ERGULCU
+# SPDX-License-Identifier: Apache-2.0
+
+# Zipkin: http://localhost:9411 (traces are kept in memory).
 services:
   zipkin:
-    image: openzipkin/zipkin:3
+    image: openzipkin/zipkin:3.6
+    restart: unless-stopped
     ports:
       - "9411:9411"
-    volumes:
-      - zipkin-storage:/zipkin
-    restart: always
-
-volumes:
-  zipkin-storage:
